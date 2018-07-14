@@ -44,9 +44,19 @@ CREATE SERVER ahu_fdw FOREIGN DATA WRAPPER multicorn OPTIONS(
   url 'http://ahungry.com',
 );
 
-CREATE FOREIGN TABLE wts (id text, listing text) SERVER ahu_fdw;
+CREATE FOREIGN TABLE wts (
+  id text,
+  seller text,
+  listing text) SERVER ahu_fdw;
 
 SELECT * FROM wts;
+
+-- Oh, you want it faster?  use a materialized view to cache it:
+DROP MATERIALIZED VIEW IF EXISTS mv_wts;
+CREATE MATERIALIZED VIEW mv_wts AS SELECT * FROM wts;
+
+-- Periodically refresh (use a trigger or something)
+REFRESH MATERIALIZED VIEW mv_wts;
 ```
 
 If you see an ImportError when trying to `CREATE SERVER` doublecheck
